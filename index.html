@@ -16,7 +16,6 @@
             --bg: #f0f2f5;
             --card: #ffffff;
             --text: #1a1a1a;
-            --green: #27ae60;
         }
 
         body {
@@ -29,10 +28,11 @@
             user-select: none;
         }
 
-        /* --- PIN SCREEN --- */
+        /* --- PIN SCREEN (Fixed High Z-Index) --- */
         #pin-screen {
             position: fixed; top:0; left:0; right:0; bottom:0;
-            background: var(--primary); z-index: 2000;
+            width: 100vw; height: 100vh;
+            background: var(--primary); z-index: 9999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             color: white;
         }
@@ -45,6 +45,7 @@
             background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2);
             color: white; font-size: 1.5rem; font-weight: bold;
             display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
         }
         .num-btn:active { background: rgba(255,255,255,0.3); }
 
@@ -82,81 +83,57 @@
         .cat-title { font-weight: 700; color: #444; font-size: 1rem; }
         .cat-count { font-size: 0.8rem; color: #999; margin-top: 5px; }
 
-        /* --- DETAIL VIEW (THE BIG UPGRADE) --- */
+        /* Detail View */
         #detail-view {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: var(--bg); z-index: 500; display: none;
-            flex-direction: column;
+            flex-direction: column; overflow-y: auto;
         }
         .detail-header {
             background: white; padding: 20px; border-bottom: 1px solid #eee;
-            display: flex; align-items: center; gap: 15px;
+            display: flex; align-items: center; gap: 15px; position: sticky; top:0;
         }
         .back-btn { font-size: 1.5rem; background: none; border: none; cursor: pointer; }
         
-        .item-list { padding: 15px; overflow-y: auto; }
-        
-        /* The "Big Box" per item */
-        .big-card {
-            background: white; border-radius: 16px; overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px;
+        .item-list { padding: 15px; padding-bottom: 80px; }
+        .item-card {
+            background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e0e0e0;
         }
-        .bc-header {
-            padding: 15px 20px; background: #f8f9fa; border-bottom: 1px solid #eee;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .bc-title { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
         
-        .bc-body { padding: 0 20px 20px; }
-        
-        .data-row {
-            display: flex; flex-direction: column; padding: 12px 0; border-bottom: 1px solid #f0f0f0;
-        }
-        .data-label { font-size: 0.75rem; color: #888; text-transform: uppercase; font-weight: bold; margin-bottom: 4px; }
-        .data-val-group { display: flex; justify-content: space-between; align-items: center; }
-        .data-val { font-size: 1.05rem; font-weight: 500; color: #333; font-family: monospace; letter-spacing: 0.5px; }
-        
-        .btn-copy { background: #eef2f5; color: #555; border: none; padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; }
-        .btn-cal { background: #e8f5e9; color: var(--green); border: none; padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; }
+        /* Field Styling */
+        .field-row { margin-bottom: 10px; }
+        .lbl { font-size: 0.75rem; color: #888; text-transform: uppercase; font-weight: bold; display:block; margin-bottom:2px;}
+        .val { font-size: 1.05rem; font-weight: 500; color: #333; word-break: break-all; }
+        .val-money { color: var(--accent); font-weight:bold; }
+        .copy-row { display: flex; justify-content: space-between; align-items: center; }
+        .btn-mini { padding: 4px 8px; font-size: 0.75rem; border: 1px solid #ccc; background: #fff; border-radius: 4px; color: #555; }
 
-        /* Phone Book */
-        .phone-stack { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
-        .phone-btn {
-            display: flex; justify-content: space-between; align-items: center;
-            background: #e3f2fd; border: 1px solid #bbdefb; color: #1565c0;
-            padding: 12px 15px; border-radius: 10px; text-decoration: none; font-weight: 600;
+        /* Phone Buttons */
+        .phone-stack { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px; }
+        .act-btn {
+            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #bbdefb;
+            background: #e3f2fd; color: #1565c0; font-weight: 600; font-size: 0.95rem;
+            text-decoration: none; text-align: center; display: block; box-sizing: border-box;
         }
-        .portal-btn {
-             display: block; text-align: center; background: var(--primary); color: white;
-             padding: 12px; border-radius: 10px; text-decoration: none; font-weight: bold; margin-top: 10px;
-        }
+        .note-block { background: #fff8e1; padding: 10px; border-radius: 8px; font-size: 0.9rem; color: #5d4037; margin-top: 10px; white-space: pre-wrap; }
 
-        /* Collapsible Notes */
-        .notes-section { margin-top: 15px; border-top: 2px dashed #eee; padding-top: 10px; }
-        .notes-toggle {
-            background: none; border: none; color: #888; font-weight: bold; font-size: 0.9rem;
-            display: flex; align-items: center; gap: 5px; cursor: pointer; padding: 0;
-        }
-        .notes-content { display: none; margin-top: 10px; font-size: 0.95rem; line-height: 1.5; color: #555; background: #fffdf0; padding: 10px; border-radius: 8px; }
-        .notes-content.show { display: block; }
-
-        /* --- EDITOR MODAL --- */
+        /* Editor Modal */
         .modal-bg {
             display: none; position: fixed; top:0; left:0; right:0; bottom:0;
             background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;
         }
         .modal {
-            background: white; width: 90%; max-width: 450px;
+            background: white; width: 90%; max-width: 400px;
             border-radius: 16px; padding: 20px; max-height: 85vh; overflow-y: auto;
         }
-        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;}
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit;}
         
-        .ph-row { display: flex; gap: 10px; margin-bottom: 10px; }
-        .ph-row input { margin-bottom: 0; }
-        .btn-sm { padding: 5px 10px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; }
+        /* Dynamic Phone List in Editor */
+        .phone-edit-row { display: flex; gap: 5px; margin-bottom: 5px; }
+        .phone-edit-row input { margin-bottom: 0; }
         
         .full-btn { width: 100%; padding: 14px; border-radius: 8px; background: var(--primary); color: white; border: none; font-weight: bold; font-size: 1rem; margin-top: 10px; }
-
         .fab {
             position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px;
             background: var(--accent); color: white; border-radius: 50%;
@@ -168,4 +145,392 @@
 <body>
 
 <div id="pin-screen">
-    <div style="margin-bottom:20px; font-size:1.2
+    <div style="margin-bottom:20px; font-size:1.2rem; font-weight:bold;">Enter PIN</div>
+    <div class="pin-dots">
+        <div class="dot" id="d1"></div><div class="dot" id="d2"></div><div class="dot" id="d3"></div><div class="dot" id="d4"></div>
+    </div>
+    <div class="numpad">
+        <div class="num-btn" onclick="press(1)">1</div><div class="num-btn" onclick="press(2)">2</div><div class="num-btn" onclick="press(3)">3</div>
+        <div class="num-btn" onclick="press(4)">4</div><div class="num-btn" onclick="press(5)">5</div><div class="num-btn" onclick="press(6)">6</div>
+        <div class="num-btn" onclick="press(7)">7</div><div class="num-btn" onclick="press(8)">8</div><div class="num-btn" onclick="press(9)">9</div>
+        <div></div><div class="num-btn" onclick="press(0)">0</div><div class="num-btn" onclick="del()">⌫</div>
+    </div>
+</div>
+
+<div id="main-app" style="display:none;">
+    <header>
+        <h1>🛡️ Vault</h1>
+        <button onclick="openSettings()" style="background:none; border:none; font-size:1.2rem;">⚙️</button>
+    </header>
+
+    <div class="emergency-row" id="sos-bar"></div>
+
+    <div class="grid">
+        <div class="cat-card" onclick="openCategory('Car')">
+            <div class="cat-icon">🚗</div><div class="cat-title">Vehicles</div><div class="cat-count" id="cnt-Car">0</div>
+        </div>
+        <div class="cat-card" onclick="openCategory('Home')">
+            <div class="cat-icon">🏠</div><div class="cat-title">Home</div><div class="cat-count" id="cnt-Home">0</div>
+        </div>
+        <div class="cat-card" onclick="openCategory('Travel')">
+            <div class="cat-icon">✈️</div><div class="cat-title">Travel</div><div class="cat-count" id="cnt-Travel">0</div>
+        </div>
+        <div class="cat-card" onclick="openCategory('Utilities')">
+            <div class="cat-icon">💡</div><div class="cat-title">Utilities</div><div class="cat-count" id="cnt-Utilities">0</div>
+        </div>
+        <div class="cat-card" onclick="openCategory('Life')">
+            <div class="cat-icon">❤️</div><div class="cat-title">Life/Health</div><div class="cat-count" id="cnt-Life">0</div>
+        </div>
+        <div class="cat-card" onclick="openCategory('Pet')">
+            <div class="cat-icon">🐕</div><div class="cat-title">Pet</div><div class="cat-count" id="cnt-Pet">0</div>
+        </div>
+    </div>
+
+    <button class="fab" onclick="openEditor()">+</button>
+</div>
+
+<div id="detail-view">
+    <div class="detail-header">
+        <button class="back-btn" onclick="closeCategory()">←</button>
+        <h2 id="detail-title" style="margin:0;">Category</h2>
+    </div>
+    <div id="detail-list" class="item-list"></div>
+</div>
+
+<div id="editor-modal" class="modal-bg">
+    <div class="modal">
+        <h3>Add / Edit Item</h3>
+        <input type="hidden" id="edit-id">
+        
+        <label class="lbl">Category</label>
+        <select id="inp-cat">
+            <option value="Car">Vehicles</option>
+            <option value="Home">Home</option>
+            <option value="Travel">Travel</option>
+            <option value="Utilities">Utilities</option>
+            <option value="Life">Life & Health</option>
+            <option value="Pet">Pet</option>
+        </select>
+        
+        <label class="lbl">Title (e.g. Audi A4)</label>
+        <input type="text" id="inp-title" placeholder="Name this item">
+        
+        <label class="lbl">Provider Name</label>
+        <input type="text" id="inp-prov" placeholder="e.g. Aviva">
+        
+        <label class="lbl">Policy / Acct Number</label>
+        <input type="text" id="inp-pol" placeholder="Policy Ref">
+        
+        <label class="lbl">Customer ID (Optional)</label>
+        <input type="text" id="inp-cust" placeholder="Customer Number">
+        
+        <div style="display:flex; gap:10px;">
+            <div style="flex:1;">
+                <label class="lbl">Renewal Date</label>
+                <input type="date" id="inp-renew">
+            </div>
+            <div style="flex:1;">
+                <label class="lbl">Premium (£)</label>
+                <input type="number" id="inp-prem" placeholder="0.00">
+            </div>
+        </div>
+
+        <label class="lbl">Phone Numbers</label>
+        <div id="phone-list-container"></div>
+        <button class="btn-mini" onclick="addPhoneRow()" style="width:100%; padding:10px; margin-bottom:15px;">+ Add Phone Number</button>
+
+        <label class="lbl">Notes</label>
+        <textarea id="inp-notes" rows="3" placeholder="Excess, Named Drivers, etc."></textarea>
+
+        <label class="lbl" style="margin-top:10px;">Tag as Emergency SOS?</label>
+        <select id="inp-sos">
+            <option value="no">No</option>
+            <option value="yes">Yes (Show at top of Dashboard)</option>
+        </select>
+
+        <button class="full-btn" onclick="saveItem()">Save</button>
+        <button class="full-btn" style="background:#ffebee; color:#d32f2f; margin-top:10px;" onclick="deleteItem()">Delete</button>
+        <button class="full-btn" style="background:none; color:#555;" onclick="document.getElementById('editor-modal').style.display='none'">Cancel</button>
+    </div>
+</div>
+
+<script>
+    // --- PIN SYSTEM ---
+    let pin = "";
+    const correctPin = localStorage.getItem('vaultPin') || "0000";
+
+    function press(n) {
+        if(pin.length < 4) {
+            pin += n;
+            updateDots();
+            if(pin.length === 4) setTimeout(checkPin, 100);
+        }
+    }
+    function del() { pin = pin.slice(0, -1); updateDots(); }
+    function updateDots() {
+        for(let i=1; i<=4; i++) {
+            document.getElementById('d'+i).classList.toggle('filled', i <= pin.length);
+        }
+    }
+    function checkPin() {
+        if(pin === correctPin) {
+            document.getElementById('pin-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+        } else {
+            alert("Wrong PIN");
+            pin = ""; updateDots();
+        }
+    }
+
+    // --- DATA ---
+    // Items now include a 'phones' array: [{label:'Claims', num:'123'}]
+    let items = JSON.parse(localStorage.getItem('vaultData_v3')) || [];
+
+    function save() {
+        localStorage.setItem('vaultData_v3', JSON.stringify(items));
+        refreshCounts();
+        renderSOS();
+    }
+
+    function refreshCounts() {
+        const cats = ['Car','Home','Travel','Utilities','Life','Pet'];
+        cats.forEach(c => {
+            const count = items.filter(i => i.cat === c).length;
+            document.getElementById('cnt-'+c).innerText = count + " items";
+        });
+    }
+
+    function renderSOS() {
+        const sosItems = items.filter(i => i.sos === 'yes');
+        const bar = document.getElementById('sos-bar');
+        bar.innerHTML = sosItems.map(i => {
+            // Find first number
+            const num = (i.phones && i.phones.length > 0) ? i.phones[0].num : '';
+            if(!num) return '';
+            return `<button class="sos-btn" onclick="window.location.href='tel:${num}'"><span>📞</span> ${i.title}</button>`;
+        }).join('');
+    }
+
+    // --- DETAIL VIEW ---
+    function openCategory(cat) {
+        document.getElementById('detail-view').style.display = 'flex';
+        document.getElementById('detail-title').innerText = cat;
+        renderList(cat);
+    }
+    function closeCategory() { document.getElementById('detail-view').style.display = 'none'; }
+
+    function renderList(cat) {
+        const list = items.filter(i => i.cat === cat);
+        const container = document.getElementById('detail-list');
+        
+        if(list.length === 0) {
+            container.innerHTML = '<div style="text-align:center; margin-top:50px; color:#999;">No items yet.<br>Click + on main screen to add.</div>';
+            return;
+        }
+
+        container.innerHTML = list.map(i => {
+            // Phone Buttons HTML
+            let phoneHtml = '';
+            if(i.phones && i.phones.length > 0) {
+                phoneHtml = '<div class="phone-stack">' + i.phones.map(p => 
+                    `<a href="tel:${p.num}" class="act-btn">📞 ${p.label || 'Call'} (${p.num})</a>`
+                ).join('') + '</div>';
+            }
+
+            // Date / Cal HTML
+            let dateHtml = '';
+            if(i.renew) {
+                const niceDate = new Date(i.renew).toLocaleDateString('en-GB');
+                dateHtml = `
+                <div class="field-row">
+                    <span class="lbl">Renewal Date</span>
+                    <div class="copy-row">
+                        <span class="val">${niceDate}</span>
+                        <button class="btn-mini" onclick="addToCal('${i.title} Renewal', '${i.renew}')">📅 Add to Cal</button>
+                    </div>
+                </div>`;
+            }
+
+            return `
+            <div class="item-card">
+                <div style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
+                    <div style="font-weight:bold; font-size:1.2rem; color:var(--primary);">${i.title}</div>
+                    <button onclick="editItem(${i.id})" style="border:none; background:none; font-size:1rem;">✏️ Edit</button>
+                </div>
+                
+                ${i.prov ? `<div class="field-row"><span class="lbl">Provider</span><span class="val">${i.prov}</span></div>` : ''}
+                
+                ${i.pol ? `
+                <div class="field-row">
+                    <span class="lbl">Policy Number</span>
+                    <div class="copy-row">
+                        <span class="val" style="font-family:monospace; color:#333;">${i.pol}</span>
+                        <button class="btn-mini" onclick="copy('${i.pol}')">📋 Copy</button>
+                    </div>
+                </div>` : ''}
+
+                ${i.cust ? `
+                <div class="field-row">
+                    <span class="lbl">Customer ID</span>
+                    <div class="copy-row">
+                        <span class="val">${i.cust}</span>
+                        <button class="btn-mini" onclick="copy('${i.cust}')">📋 Copy</button>
+                    </div>
+                </div>` : ''}
+
+                <div style="display:flex; gap:15px; margin-top:10px;">
+                    <div style="flex:1;">${dateHtml}</div>
+                    ${i.prem ? `<div style="flex:1;"><div class="field-row"><span class="lbl">Premium</span><span class="val val-money">£${i.prem}</span></div></div>` : ''}
+                </div>
+
+                ${i.notes ? `<div class="note-block">${i.notes}</div>` : ''}
+                
+                ${phoneHtml}
+            </div>
+            `;
+        }).join('');
+    }
+
+    // --- EDITOR LOGIC ---
+    let tempPhones = [];
+
+    function openEditor() {
+        document.getElementById('edit-id').value = '';
+        // Clear fields
+        ['inp-title','inp-prov','inp-pol','inp-cust','inp-renew','inp-prem','inp-notes'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('inp-sos').value = 'no';
+        tempPhones = [];
+        renderPhoneInputs();
+        document.getElementById('editor-modal').style.display = 'flex';
+    }
+
+    function editItem(id) {
+        const i = items.find(x => x.id === id);
+        document.getElementById('edit-id').value = id;
+        document.getElementById('inp-cat').value = i.cat;
+        document.getElementById('inp-title').value = i.title;
+        document.getElementById('inp-prov').value = i.prov || '';
+        document.getElementById('inp-pol').value = i.pol || '';
+        document.getElementById('inp-cust').value = i.cust || '';
+        document.getElementById('inp-renew').value = i.renew || '';
+        document.getElementById('inp-prem').value = i.prem || '';
+        document.getElementById('inp-notes').value = i.notes || '';
+        document.getElementById('inp-sos').value = i.sos || 'no';
+        
+        // Load phones
+        tempPhones = i.phones ? [...i.phones] : [];
+        renderPhoneInputs();
+        
+        document.getElementById('editor-modal').style.display = 'flex';
+    }
+
+    // Dynamic Phone Rows
+    function addPhoneRow() {
+        tempPhones.push({ label: '', num: '' });
+        renderPhoneInputs();
+    }
+    function updatePhone(idx, field, val) {
+        tempPhones[idx][field] = val;
+    }
+    function removePhone(idx) {
+        tempPhones.splice(idx, 1);
+        renderPhoneInputs();
+    }
+    function renderPhoneInputs() {
+        const div = document.getElementById('phone-list-container');
+        div.innerHTML = tempPhones.map((p, idx) => `
+            <div class="phone-edit-row">
+                <input type="text" placeholder="Label (e.g. Claims)" value="${p.label}" oninput="updatePhone(${idx}, 'label', this.value)" style="flex:1;">
+                <input type="tel" placeholder="Number" value="${p.num}" oninput="updatePhone(${idx}, 'num', this.value)" style="flex:1;">
+                <button onclick="removePhone(${idx})" style="background:#ffebee; color:red; border:1px solid red; border-radius:4px;">✕</button>
+            </div>
+        `).join('');
+    }
+
+    function saveItem() {
+        const id = document.getElementById('edit-id').value;
+        const newItem = {
+            id: id ? parseInt(id) : Date.now(),
+            cat: document.getElementById('inp-cat').value,
+            title: document.getElementById('inp-title').value,
+            prov: document.getElementById('inp-prov').value,
+            pol: document.getElementById('inp-pol').value,
+            cust: document.getElementById('inp-cust').value,
+            renew: document.getElementById('inp-renew').value,
+            prem: document.getElementById('inp-prem').value,
+            notes: document.getElementById('inp-notes').value,
+            sos: document.getElementById('inp-sos').value,
+            phones: tempPhones.filter(p => p.num.trim() !== '') // Save only if number exists
+        };
+        
+        if(!newItem.title) return alert("Title required");
+
+        if(id) {
+            const idx = items.findIndex(x => x.id == id);
+            items[idx] = newItem;
+        } else {
+            items.push(newItem);
+        }
+        save();
+        if(document.getElementById('detail-view').style.display === 'flex') {
+            renderList(newItem.cat);
+        }
+        document.getElementById('editor-modal').style.display = 'none';
+    }
+
+    function deleteItem() {
+        if(confirm("Delete this item?")) {
+            const id = document.getElementById('edit-id').value;
+            items = items.filter(x => x.id != id);
+            save();
+            document.getElementById('editor-modal').style.display = 'none';
+            if(document.getElementById('detail-view').style.display === 'flex') closeCategory();
+        }
+    }
+
+    // --- UTILS ---
+    function copy(txt) {
+        navigator.clipboard.writeText(txt).then(() => alert("Copied to clipboard!"));
+    }
+    function addToCal(title, dateStr) {
+        if(!dateStr) return;
+        const d = new Date(dateStr);
+        const iso = d.toISOString().replace(/-|:|\.\d\d\d/g,"").split("T")[0];
+        const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${iso}/${iso}&details=Insurance%20Renewal`;
+        window.open(url, '_blank');
+    }
+
+    // --- SETTINGS ---
+    function openSettings() {
+        const choice = prompt("Settings:\n1. Change PIN\n2. Backup Data\n3. Restore Data\n\nEnter number:");
+        if(choice === '1') {
+            const newPin = prompt("Enter new 4-digit PIN:");
+            if(newPin && newPin.length === 4) {
+                localStorage.setItem('vaultPin', newPin);
+                alert("PIN Changed.");
+                location.reload();
+            }
+        }
+        if(choice === '2') {
+            const json = JSON.stringify(items);
+            navigator.clipboard.writeText(json).then(() => alert("Data copied! Paste into a secure note."));
+        }
+        if(choice === '3') {
+            const json = prompt("Paste backup code:");
+            if(json) {
+                try {
+                    items = JSON.parse(json);
+                    save();
+                    alert("Restored!");
+                    location.reload();
+                } catch(e) { alert("Invalid code"); }
+            }
+        }
+    }
+
+    // Init
+    refreshCounts();
+    renderSOS();
+</script>
+</body>
+</html>
