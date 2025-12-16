@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lockwood Vault</title>
+    
+    <link rel="icon" href="icon.png" type="image/png">
+    <link rel="apple-touch-icon" href="icon.png">
+
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --danger: #e74c3c;
+            --bg: #f0f2f5;
+            --card: #ffffff;
+            --text: #1a1a1a;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding-bottom: 100px;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        /* --- PIN SCREEN --- */
+        #pin-screen {
+            position: fixed; top:0; left:0; right:0; bottom:0;
+            background: var(--primary); z-index: 2000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white;
+        }
+        .pin-dots { display: flex; gap: 15px; margin-bottom: 30px; }
+        .dot { width: 15px; height: 15px; border-radius: 50%; border: 2px solid white; background: transparent; transition: 0.2s; }
+        .dot.filled { background: white; }
+        .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .num-btn {
+            width: 70px; height: 70px; border-radius: 50%;
+            background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2);
+            color: white; font-size: 1.5rem; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .num-btn:active { background: rgba(255,255,255,0.3); }
+
+        /* --- DASHBOARD --- */
+        header {
+            background: var(--primary); color: white; padding: 20px;
+            position: sticky; top: 0; z-index: 100;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h1 { margin: 0; font-size: 1.3rem; display: flex; gap: 10px; align-items: center; }
+
+        /* Emergency Row */
+        .emergency-row {
+            display: flex; gap: 10px; padding: 15px; overflow-x: auto;
+            background: white; border-bottom: 1px solid #ddd;
+        }
+        .sos-btn {
+            background: #ffebee; color: var(--danger); border: 1px solid var(--danger);
+            padding: 10px 15px; border-radius: 30px; font-weight: bold; font-size: 0.9rem;
+            white-space: nowrap; flex-shrink: 0; display: flex; align-items: center; gap: 6px;
+        }
+
+        /* Category Grid */
+        .grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px;
+        }
+        .cat-card {
+            background: white; border-radius: 16px; padding: 20px;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.2s;
+        }
+        .cat-card:active { transform: scale(0.98); background: #f9f9f9; }
+        .cat-icon { font-size: 2.5rem; margin-bottom: 10px; }
+        .cat-title { font-weight: 700; color: #444; font-size: 1rem; }
+        .cat-count { font-size: 0.8rem; color: #999; margin-top: 5px; }
+
+        /* Detail View (Hidden by default) */
+        #detail-view {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg); z-index: 500; display: none;
+            flex-direction: column;
+        }
+        .detail-header {
+            background: white; padding: 20px; border-bottom: 1px solid #eee;
+            display: flex; align-items: center; gap: 15px;
+        }
+        .back-btn { font-size: 1.5rem; background: none; border: none; cursor: pointer; }
+        
+        .item-list { padding: 15px; overflow-y: auto; }
+        .item-card {
+            background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .item-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .lbl { font-size: 0.75rem; color: #888; text-transform: uppercase; font-weight: bold; }
+        .val { font-size: 1rem; font-weight: 500; color: #333; }
+        
+        .action-row { display: flex; gap: 10px; margin-top: 15px; }
+        .act-btn {
+            flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #eee;
+            background: #f8f9fa; font-weight: 600; font-size: 0.9rem;
+            text-decoration: none; text-align: center; color: #333;
+        }
+        .act-btn.call { background: #e3f2fd; color: #1976d2; border-color: #bbdefb; }
+
+        /* Editor Modal */
+        .modal-bg {
+            display: none; position: fixed; top:0; left:0; right:0; bottom:0;
+            background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;
+        }
+        .modal {
+            background: white; width: 90%; max-width: 400px;
+            border-radius: 16px; padding: 20px; max-height: 80vh; overflow-y: auto;
+        }
+        input, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;}
+        .full-btn { width: 100%; padding: 14px; border-radius: 8px; background: var(--primary); color: white; border: none; font-weight: bold; font-size: 1rem; margin-top: 10px; }
+
+        .fab {
+            position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px;
+            background: var(--accent); color: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 2rem;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4); border: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="pin-screen">
+    <div style="margin-bottom:20px; font-size:1.2rem; font-weight:bold;">Enter PIN</div>
+    <div class="pin-dots">
+        <div class="dot" id="d1"></div><div class="dot" id="d2"></div><div class="dot" id="d3"></div><div class="dot" id="d4"></div>
+    </div>
+    <div class="numpad">
+        <div class="num-btn" onclick="press(1)">1</div><div class="num-btn" onclick="press(2)">2</div><div class="num-btn" onclick="press(3)">3</div>
+        <div class="num-btn" onclick="press(4)">4</div><div class="num-btn" onclick="press(5)">5</div><div class="num-btn" onclick="press(6)">6</div>
+        <div class="num-btn" onclick="press(7)">7</div><div class="num-btn" onclick="press(8)">8</div><div class="num-btn" onclick="press(9)">9</div>
+        <div></div><div class="num-btn" onclick="press(0)">0</div><div class="num-btn" onclick="del()">⌫</div>
+    </div>
+</div>
+
+<div id="main-app" style="display:none;">
+    <header>
+        <h1>🛡️ Vault</h1>
+        <button onclick="openSettings()" style="background:none; border:none; font-size:1.2rem;">⚙️</button>
+    </header>
+
+    <div class="emergency-row" id="sos-bar">
+        </div>
+
+    <div class="grid">
+        <div class="cat-card" onclick="openCategory('Car')">
+            <div class="cat-icon">🚗</div><div class="cat-title">Vehicles</div><div class="cat-count" id="cnt-Car">0 items</div>
+        </div>
+        <div class="cat-card" onclick="openCategory('Home')">
+            <div class="cat-icon">🏠</div><div class="cat-title">Home</div><div class="cat-count" id="cnt-Home">0 items</div>
+        </div>
+        <div class="cat-card" onclick="openCategory('Travel')">
+            <div class="cat-icon">✈️</div><div class="cat-title">Travel</div><div class="cat-count" id="cnt-Travel">0 items</div>
+        </div>
+        <div class="cat-card" onclick="openCategory('Utilities')">
+            <div class="cat-icon">💡</div><div class="cat-title">Utilities</div><div class="cat-count" id="cnt-Utilities">0 items</div>
+        </div>
+        <div class="cat-card" onclick="openCategory('Life')">
+            <div class="cat-icon">❤️</div><div class="cat-title">Life & Health</div><div class="cat-count" id="cnt-Life">0 items</div>
+        </div>
+        <div class="cat-card" onclick="openCategory('Pet')">
+            <div class="cat-icon">🐕</div><div class="cat-title">Pet</div><div class="cat-count" id="cnt-Pet">0 items</div>
+        </div>
+    </div>
+
+    <button class="fab" onclick="openEditor()">+</button>
+</div>
+
+<div id="detail-view">
+    <div class="detail-header">
+        <button class="back-btn" onclick="closeCategory()">←</button>
+        <h2 id="detail-title" style="margin:0;">Category</h2>
+    </div>
+    <div id="detail-list" class="item-list"></div>
+</div>
+
+<div id="editor-modal" class="modal-bg">
+    <div class="modal">
+        <h3>Add / Edit Item</h3>
+        <input type="hidden" id="edit-id">
+        <label class="lbl">Category</label>
+        <select id="inp-cat">
+            <option value="Car">Vehicles</option>
+            <option value="Home">Home (Insurance/Emergency)</option>
+            <option value="Travel">Travel</option>
+            <option value="Utilities">Utilities (Gas/Elec/Wifi)</option>
+            <option value="Life">Life & Health</option>
+            <option value="Pet">Pet</option>
+        </select>
+        <label class="lbl">Title (e.g. Audi A4, Gas)</label>
+        <input type="text" id="inp-title">
+        <label class="lbl">Provider</label>
+        <input type="text" id="inp-prov">
+        <label class="lbl">Policy / Acct Number</label>
+        <input type="text" id="inp-pol">
+        <label class="lbl">Phone Number</label>
+        <input type="tel" id="inp-tel">
+        <label class="lbl">Tag as Emergency SOS?</label>
+        <select id="inp-sos">
+            <option value="no">No</option>
+            <option value="yes">Yes (Show at top)</option>
+        </select>
+
+        <button class="full-btn" onclick="saveItem()">Save</button>
+        <button class="full-btn" style="background:#ffebee; color:#d32f2f; margin-top:10px;" onclick="deleteItem()">Delete</button>
+        <button class="full-btn" style="background:none; color:#555;" onclick="document.getElementById('editor-modal').style.display='none'">Cancel</button>
+    </div>
+</div>
+
+<script>
+    // --- PIN LOGIC ---
+    let pin = "";
+    const correctPin = localStorage.getItem('vaultPin') || "0000";
+
+    function press(n) {
+        if(pin.length < 4) {
+            pin += n;
+            updateDots();
+            if(pin.length === 4) checkPin();
+        }
+    }
+    function del() { pin = pin.slice(0, -1); updateDots(); }
+    function updateDots() {
+        for(let i=1; i<=4; i++) {
+            document.getElementById('d'+i).classList.toggle('filled', i <= pin.length);
+        }
+    }
+    function checkPin() {
+        if(pin === correctPin) {
+            document.getElementById('pin-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+        } else {
+            alert("Wrong PIN");
+            pin = ""; updateDots();
+        }
+    }
+
+    // --- DATA ---
+    let items = JSON.parse(localStorage.getItem('vaultData')) || [];
+
+    function save() {
+        localStorage.setItem('vaultData', JSON.stringify(items));
+        refreshCounts();
+        renderSOS();
+    }
+
+    function refreshCounts() {
+        const cats = ['Car','Home','Travel','Utilities','Life','Pet'];
+        cats.forEach(c => {
+            const count = items.filter(i => i.cat === c).length;
+            document.getElementById('cnt-'+c).innerText = count + " items";
+        });
+    }
+
+    function renderSOS() {
+        const sosItems = items.filter(i => i.sos === 'yes');
+        const bar = document.getElementById('sos-bar');
+        if(sosItems.length === 0) {
+            bar.innerHTML = '<div style="color:#999; font-size:0.8rem; padding:5px;">Add items with "Emergency SOS" tag to see them here.</div>';
+            return;
+        }
+        bar.innerHTML = sosItems.map(i => `
+            <button class="sos-btn" onclick="window.location.href='tel:${i.tel}'">
+                <span>📞</span> ${i.title}
+            </button>
+        `).join('');
+    }
+
+    // --- CATEGORY VIEW ---
+    function openCategory(cat) {
+        document.getElementById('detail-view').style.display = 'flex';
+        document.getElementById('detail-title').innerText = cat;
+        renderList(cat);
+    }
+    function closeCategory() {
+        document.getElementById('detail-view').style.display = 'none';
+    }
+
+    function renderList(cat) {
+        const list = items.filter(i => i.cat === cat);
+        const container = document.getElementById('detail-list');
+        
+        if(list.length === 0) {
+            container.innerHTML = '<div style="text-align:center; margin-top:50px; color:#999;">No items yet.<br>Click + to add.</div>';
+            return;
+        }
+
+        container.innerHTML = list.map(i => `
+            <div class="item-card">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <div style="font-weight:bold; font-size:1.1rem;">${i.title}</div>
+                    <button onclick="editItem(${i.id})" style="border:none; background:none; font-size:1rem;">✏️</button>
+                </div>
+                ${i.prov ? `<div class="item-row"><span class="lbl">Provider</span><span class="val">${i.prov}</span></div>` : ''}
+                ${i.pol ? `<div class="item-row"><span class="lbl">Policy/Acct</span><span class="val" style="font-family:monospace;">${i.pol}</span></div>` : ''}
+                
+                <div class="action-row">
+                    ${i.tel ? `<a href="tel:${i.tel}" class="act-btn call">📞 Call</a>` : ''}
+                    ${i.pol ? `<button onclick="copy('${i.pol}')" class="act-btn">📋 Copy Ref</button>` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function copy(txt) {
+        navigator.clipboard.writeText(txt).then(() => alert("Copied!"));
+    }
+
+    // --- EDITOR ---
+    function openEditor() {
+        document.getElementById('edit-id').value = '';
+        document.getElementById('inp-title').value = '';
+        document.getElementById('inp-prov').value = '';
+        document.getElementById('inp-pol').value = '';
+        document.getElementById('inp-tel').value = '';
+        document.getElementById('editor-modal').style.display = 'flex';
+    }
+
+    function editItem(id) {
+        const i = items.find(x => x.id === id);
+        document.getElementById('edit-id').value = id;
+        document.getElementById('inp-cat').value = i.cat;
+        document.getElementById('inp-title').value = i.title;
+        document.getElementById('inp-prov').value = i.prov;
+        document.getElementById('inp-pol').value = i.pol;
+        document.getElementById('inp-tel').value = i.tel;
+        document.getElementById('inp-sos').value = i.sos || 'no';
+        document.getElementById('editor-modal').style.display = 'flex';
+    }
+
+    function saveItem() {
+        const id = document.getElementById('edit-id').value;
+        const newItem = {
+            id: id ? parseInt(id) : Date.now(),
+            cat: document.getElementById('inp-cat').value,
+            title: document.getElementById('inp-title').value,
+            prov: document.getElementById('inp-prov').value,
+            pol: document.getElementById('inp-pol').value,
+            tel: document.getElementById('inp-tel').value,
+            sos: document.getElementById('inp-sos').value
+        };
+        
+        if(!newItem.title) return alert("Title required");
+
+        if(id) {
+            const idx = items.findIndex(x => x.id == id);
+            items[idx] = newItem;
+        } else {
+            items.push(newItem);
+        }
+        save();
+        if(document.getElementById('detail-view').style.display === 'flex') {
+            renderList(newItem.cat);
+        }
+        document.getElementById('editor-modal').style.display = 'none';
+    }
+
+    function deleteItem() {
+        if(confirm("Delete this item?")) {
+            const id = document.getElementById('edit-id').value;
+            items = items.filter(x => x.id != id);
+            save();
+            document.getElementById('editor-modal').style.display = 'none';
+            if(document.getElementById('detail-view').style.display === 'flex') {
+                closeCategory(); // Close to refresh
+            }
+        }
+    }
+
+    // --- SETTINGS ---
+    function openSettings() {
+        const choice = prompt("Settings Menu:\n1. Change PIN\n2. Backup Data\n3. Restore Data\n\nEnter number:");
+        if(choice === '1') {
+            const newPin = prompt("Enter new 4-digit PIN:");
+            if(newPin && newPin.length === 4) {
+                localStorage.setItem('vaultPin', newPin);
+                alert("PIN Changed. Don't forget it!");
+                location.reload();
+            }
+        }
+        if(choice === '2') {
+            const json = JSON.stringify(items);
+            navigator.clipboard.writeText(json).then(() => alert("Data copied to clipboard!"));
+        }
+        if(choice === '3') {
+            const json = prompt("Paste backup code:");
+            if(json) {
+                try {
+                    items = JSON.parse(json);
+                    save();
+                    alert("Restored!");
+                    location.reload();
+                } catch(e) { alert("Invalid code"); }
+            }
+        }
+    }
+
+    // Init
+    refreshCounts();
+    renderSOS();
+</script>
+</body>
+</html>
